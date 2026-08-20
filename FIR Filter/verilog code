@@ -1,0 +1,46 @@
+module fir_filter (
+    input wire clk,
+    input wire reset,
+    input wire signed [7:0] data_in,
+
+    output reg signed [19:0] data_out
+);
+
+    // FIR Coefficients
+    parameter signed [7:0] H0 = 8'd1;
+    parameter signed [7:0] H1 = 8'd2;
+    parameter signed [7:0] H2 = 8'd2;
+    parameter signed [7:0] H3 = 8'd1;
+
+    // Delay registers
+    reg signed [7:0] x0;
+    reg signed [7:0] x1;
+    reg signed [7:0] x2;
+    reg signed [7:0] x3;
+
+    always @(posedge clk or posedge reset) begin
+        if (reset) begin
+            x0 <= 0;
+            x1 <= 0;
+            x2 <= 0;
+            x3 <= 0;
+            data_out <= 0;
+        end
+        else begin
+
+            // Shift input samples
+            x3 <= x2;
+            x2 <= x1;
+            x1 <= x0;
+            x0 <= data_in;
+
+            // FIR Filter Calculation
+            data_out <= (data_in * H0) +
+                        (x0 * H1) +
+                        (x1 * H2) +
+                        (x2 * H3);
+
+        end
+    end
+
+endmodule
